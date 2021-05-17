@@ -1,5 +1,5 @@
 import time
-from crypto_hash import crypto_hash
+from backend.util import crypto_hash
 
 
 
