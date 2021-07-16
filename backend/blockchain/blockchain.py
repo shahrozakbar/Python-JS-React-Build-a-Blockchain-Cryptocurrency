@@ -33,6 +33,16 @@ class Blockchain:
 
         self.chain = chain
 
+    def to_json(self):
+        """
+
+        Serialize the block into a dictionary of its attributes
+        :return:
+        """
+
+        return list(map(lambda block: block.to_json(), self.chain))
+
+
 
     @staticmethod
     def is_valid_chain(chain):
