@@ -39,10 +39,21 @@ class Blockchain:
         Serialize the block into a dictionary of its attributes
         :return:
         """
-
         return list(map(lambda block: block.to_json(), self.chain))
 
+    def from_json(chain_json):
+        """
+        Deserialize a list of serialized blocks into a Blokchian instance.
+        The result will contain a chain list of Block instances.
+        :return:
+        """
 
+        blockchain = Blockchain()
+        blockchain.chain = list(
+            map(lambda block_json: Block.from_json(block_json), chain_json)
+        )
+
+        return blockchain
 
     @staticmethod
     def is_valid_chain(chain):
