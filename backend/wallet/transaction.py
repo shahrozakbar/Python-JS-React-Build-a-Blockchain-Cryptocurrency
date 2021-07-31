@@ -51,6 +51,26 @@ class Transaction:
             'signature': sender_wallet.sign(ouput)
         }
 
+    def update(self, sender_wallet, recipient, amount):
+        """
+        Update the transaction with an existing or new recipient.
+        :param sender_wallet:
+        :param recipient:
+        :param amount:
+        :return:
+        """
+        if amount > self.output[sender_wallet.address]:
+            raise Exception('Amount exceeds balance')
+
+        if recipient in self.output:
+            self.output[recipient] = self.output[recipient] + amount
+        else:
+            self.output[recipient] = amount
+
+        self.output[sender_wallet.address] = \
+            self.output[sender_wallet.address] - amount
+
+        self.input = self.create_input(sender_wallet, self.output)
 
 def main():
     transaction = Transaction(Wallet(), 'recipient', 15)
