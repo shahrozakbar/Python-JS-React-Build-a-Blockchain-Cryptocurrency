@@ -3,6 +3,10 @@ import uuid
 from backend.config import STARTING_BALANCE
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.utils import (
+                                                    encode_dss_signature,
+                                                    decode_dss_signature
+                                                    )
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.exceptions import InvalidSignature
 class Wallet:
@@ -31,10 +35,11 @@ class Wallet:
         :param data:
         :return:
         """
-        return self.private_key.sign(
+        return decode_dss_signature(self.private_key.sign(
             json.dumps(data).encode('utf-8'),
-            ec.ECDSA(hashes.SHA256())
+            ec.ECDSA(hashes.SHA256()))
         )
+
     def serialize_public_key(self):
         """
         Reset the public key to its serialized version.
@@ -66,9 +71,12 @@ class Wallet:
             default_backend()
         )
 
+        print(f'\nsignature: {signature}\n')
+        (r, s) = signature
+
         try:
             deserialized_public_key.verify(
-                signature,
+               encode_dss_signature(r,s),
                 json.dumps(data).encode('utf-8'),
                 ec.ECDSA(hashes.SHA256())
             )
