@@ -30,6 +30,8 @@ def route_blockchain_mine():
     blockchain.add_block(transaction_pool.transaction_data())
     block = blockchain.chain[-1]
     pubsub.broadcast_block(block)
+    transaction_pool.clear_blockchain_transactions(blockchain)
+
     return jsonify(block.to_json())
 
 
