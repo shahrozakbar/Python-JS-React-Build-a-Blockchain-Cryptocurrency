@@ -1,6 +1,8 @@
 import time
 import uuid
 from backend.wallet.wallet import Wallet
+from backend.config import MINING_REWARD, MINING_REWARD_INPUT
+
 class Transaction:
     """
     Document of an exchange in currency from a sender to one or more recipients.
@@ -41,7 +43,7 @@ class Transaction:
 
         return output
 
-    def create_input(self, sender_wallet, ouput):
+    def create_input(self, sender_wallet, output):
         """
         Structure the input data for the transaction.
         Sign the transaction and include the sender's public key and address
@@ -56,7 +58,7 @@ class Transaction:
             'amount': sender_wallet.balance,
             'address': sender_wallet.address,
             'public_key': sender_wallet.public_key,
-            'signature': sender_wallet.sign(ouput)
+            'signature': sender_wallet.sign(output)
         }
 
     def update(self, sender_wallet, recipient, amount):
@@ -108,10 +110,17 @@ class Transaction:
         :param transaction:
         :return:
         """
+        if transaction.input == MINING_REWARD_INPUT:
+            if list(transaction.output.values()) != [MINING_REWARD]:
+                raise Exception('Invalid mining reward')
+            return
+
 
         output_total = sum(transaction.output.values())
         if transaction.input['amount'] != output_total:
             raise Exception('Invalid transaction output values')
+
+
 
         if not Wallet.verify(
             transaction.input['public_key'],
@@ -119,6 +128,19 @@ class Transaction:
             transaction.input['signature']
         ):
             raise Exception('Invalid signature ')
+
+    @staticmethod
+    def reward_transaction(miner_wallet):
+        """
+        Generate a reward transaction that award the miner.
+        :param miner_wallet:
+        :return:
+        """
+
+        output = {}
+        output[miner_wallet.address] = MINING_REWARD
+
+        return Transaction(input=MINING_REWARD_INPUT, output=output)
 
 def main():
     transaction = Transaction(Wallet(), 'recipient', 15)
